@@ -15,7 +15,5 @@
 # vendor/
 
 # Config files
-*/sources-prod.yml
 */config-prod.yml
 */seen.txt
-    

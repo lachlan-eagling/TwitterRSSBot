@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"os"
 	"strings"
+	"flag"
 
 	log "github.com/sirupsen/logrus"
 
@@ -84,6 +85,10 @@ func WriteSeen(lines []string, path string) error {
 }
 
 func main() {
+	var updateSeen bool
+	flag.BoolVar(&updateSeen, "u", false, "Parses feeds and updates seen.txt with all posts available up to current time without posting any Tweets.")
+	flag.Parse()
+
 	cfg, err := LoadConfig("config-prod.yml")
 	if err != nil {
 		log.Fatalf("Error loading config. Shutting Down. (%s)", err.Error())
@@ -131,10 +136,15 @@ func main() {
 
 	WriteSeen(seen, "seen.txt")
 
+	if updateSeen {
+		log.Info("Seen sources updated, exiting application.")
+		os.Exit(0)
+	}
+
 	client := NewTwitterClient(cfg.Twitter)
 
 	for _, tweet := range pendingTweets {
-		log.Infof("Posting tweet (%s)")
+		log.Infof("Posting tweet (%s)", tweet)
 		if err := client.PostTweet(tweet); err != nil {
 			log.Errorf("Error posting tweet (%s). %s", tweet, err.Error())
 		}

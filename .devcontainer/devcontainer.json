@@ -1,0 +1,12 @@
+{
+    "name": "RationalReads",
+    "dockerFile": "Dockerfile",
+    "appPort": "8000:8000",
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "go.gopath": "/go"
+    },
+    "extensions": [
+        "ms-vscode.go",
+    ]
+}

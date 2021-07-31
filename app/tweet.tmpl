@@ -1,5 +1,4 @@
-New post from @{{ .AuthorTwitterHandle }}
+{{if .AuthorTwitterHandle}}New post from {{ .AuthorTwitterHandle }}{{end}}
+{{if .HashTags}}{{ .HashTags}}{{end}}
 
 {{ .URL }}
-
-{{ .HashTagString}}

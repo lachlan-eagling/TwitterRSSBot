@@ -1,0 +1,20 @@
+twitter:
+  post_url: https://api.twitter.com/1.1/statuses/update.json
+  consumer_key: 
+  consumer_secret: 
+  access_token: 
+  access_secret: 
+
+sources:
+  -
+    publication_name: 
+    author_twitter: 
+    url: 
+    hash_tags:
+      - foo
+      - bar
+  -
+    publication_name: 
+    author_twitter: 
+    url: 
+    hash_tags:

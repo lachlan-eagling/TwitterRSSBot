@@ -20,6 +20,3 @@ jobs:
 
     - name: Build
       run: go build -o RationalReads -v ./...
-
-    - name: Test
-      run: go test -v ./...

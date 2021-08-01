@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"html/template"
 	"os"
 	"strings"
-	"flag"
 
 	log "github.com/sirupsen/logrus"
 
@@ -86,12 +86,22 @@ func WriteSeen(lines []string, path string) error {
 
 func main() {
 	var updateSeen bool
+	var test bool
 	flag.BoolVar(&updateSeen, "u", false, "Parses feeds and updates seen.txt with all posts available up to current time without posting any Tweets.")
+	flag.BoolVar(&test, "test", false, "Sends a test tweet and immediatley exits the application.")
 	flag.Parse()
 
 	cfg, err := LoadConfig("config-prod.yml")
 	if err != nil {
 		log.Fatalf("Error loading config. Shutting Down. (%s)", err.Error())
+	}
+	client := NewTwitterClient(cfg.Twitter)
+	if test {
+		log.Info("Sending test tweet")
+		if err := client.PostTweet("Testing 1,2,3!"); err != nil {
+			log.Errorf("Error posting test tweet. %s", err.Error())
+		}
+		os.Exit(0)
 	}
 
 	seen, err := ReadSeenFile("seen.txt")
@@ -140,8 +150,6 @@ func main() {
 		log.Info("Seen sources updated, exiting application.")
 		os.Exit(0)
 	}
-
-	client := NewTwitterClient(cfg.Twitter)
 
 	for _, tweet := range pendingTweets {
 		log.Infof("Posting tweet (%s)", tweet)

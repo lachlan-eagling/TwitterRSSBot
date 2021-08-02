@@ -87,11 +87,18 @@ func WriteSeen(lines []string, path string) error {
 func main() {
 	var updateSeen bool
 	var test bool
+	var configPath string
+	var seenPath string
 	flag.BoolVar(&updateSeen, "u", false, "Parses feeds and updates seen.txt with all posts available up to current time without posting any Tweets.")
 	flag.BoolVar(&test, "test", false, "Sends a test tweet and immediatley exits the application.")
+	flag.StringVar(&configPath, "config", "config.yml", "Path to config.yml file.")
+	flag.StringVar(&seenPath, "seen", "seen.txt", "Path to text file containing seen URLs.")
 	flag.Parse()
 
-	cfg, err := LoadConfig("config-prod.yml")
+	log.Infof("Config Path: %s", configPath)
+	log.Infof("Seen Path: %s", seenPath)
+
+	cfg, err := LoadConfig(configPath)
 	if err != nil {
 		log.Fatalf("Error loading config. Shutting Down. (%s)", err.Error())
 	}
@@ -104,7 +111,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	seen, err := ReadSeenFile("seen.txt")
+	seen, err := ReadSeenFile(seenPath)
 	if err != nil {
 		log.Fatalf("Error loading seen urls. Shutting Down. (%s)", err.Error())
 	}

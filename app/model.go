@@ -15,8 +15,11 @@ type TwitterConfig struct {
 }
 
 type Config struct {
-	Twitter TwitterConfig `yaml:"twitter"`
-	Sources []Source      `yaml:"sources"`
+	Twitter        TwitterConfig `yaml:"twitter"`
+	Sources        []Source      `yaml:"sources"`
+	UpdateSeenOnly bool
+	TestRun bool
+	SeenDataPath string
 }
 
 type Source struct {

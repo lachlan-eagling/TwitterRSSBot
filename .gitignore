@@ -17,3 +17,4 @@
 # Config files
 */config-prod.yml
 */seen.txt
+.DS_Store

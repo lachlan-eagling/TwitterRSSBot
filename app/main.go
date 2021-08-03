@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
 	"html/template"
-	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -27,61 +25,6 @@ func FormatAuthor(a string) string {
 		return ""
 	}
 	return fmt.Sprintf("@%s", a)
-}
-
-func ReadSeenFile(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines, scanner.Err()
-}
-
-// CheckAndAddToSeen checks to see if we have recorded seeing this URL
-// in a feed before, if it is a new one it is appended to the slice
-// of seen urls and returns false. Otherwise if it is a seen one returns true.
-func CheckSeen(url string, seen []string) bool {
-	for _, s := range seen {
-		if s == url {
-			return true
-		}
-	}
-	return false
-}
-
-// WriteSeen overwrites the seen file with latest list of seen urls.
-func WriteSeen(lines []string, path string) error {
-	log.Infof("Writing seen urls to %s", path)
-	file, err := os.Create(path)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	defer file.Close()
-
-	err = file.Truncate(0)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	w := bufio.NewWriter(file)
-	for _, line := range lines {
-		fmt.Fprintln(w, line)
-	}
-	return w.Flush()
 }
 
 func main() {
@@ -108,15 +51,16 @@ func main() {
 		if err := client.PostTweet("Testing 1,2,3!"); err != nil {
 			log.Errorf("Error posting test tweet. %s", err.Error())
 		}
-		os.Exit(0)
+		return
 	}
 
-	seen, err := ReadSeenFile(seenPath)
+	store, err := NewStore(seenPath)
 	if err != nil {
-		log.Fatalf("Error loading seen urls. Shutting Down. (%s)", err.Error())
+		log.Fatalf("Error setting up seen store. Shutting Down. (%s)", err.Error())
 	}
-	parser := gofeed.NewParser()
+	defer store.Close()
 
+	parser := gofeed.NewParser()
 	pendingTweets := make([]string, 0)
 
 	for _, source := range cfg.Sources {
@@ -129,13 +73,11 @@ func main() {
 		log.Infof("Parsing (%d) posts for %s", len(feed.Items), feed.Title)
 
 		for _, item := range feed.Items {
-			if CheckSeen(item.Link, seen) {
-				// This is a known URL that has already been posted. Take no further action.
+			if store.Exists(item.Link) {
 				log.Infof("Already posted %s\n", item.Link)
 				continue
 			}
-			// New URL, go ahead and post it.
-			seen = append(seen, item.Link)
+
 			post := PostData{
 				AuthorTwitterHandle: FormatAuthor(source.AuthorTwitter),
 				URL:                 item.Link,
@@ -151,11 +93,9 @@ func main() {
 
 	}
 
-	WriteSeen(seen, "seen.txt")
-
 	if updateSeen {
 		log.Info("Seen sources updated, exiting application.")
-		os.Exit(0)
+		return
 	}
 
 	for _, tweet := range pendingTweets {
@@ -164,5 +104,4 @@ func main() {
 			log.Errorf("Error posting tweet (%s). %s", tweet, err.Error())
 		}
 	}
-
 }

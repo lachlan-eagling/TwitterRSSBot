@@ -1,4 +1,4 @@
-module github.com/lachlan-eagling/RationalReads
+module github.com/lachlan-eagling/TwitterRSSBot
 
 go 1.13
 

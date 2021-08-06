@@ -1,4 +1,4 @@
-module github.com/lachlan-eagling/TwitterRSSBot
+module github.com/l0x6c/TwitterRSSBot
 
 go 1.13
 

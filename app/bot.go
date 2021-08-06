@@ -35,6 +35,13 @@ func FormatAuthor(a string) string {
 }
 
 func (b *Bot) Run() error {
+	if b.config.TestRun {
+		if err := b.twitterClient.PostTweet("Testing 1,2,3"); err != nil {
+			log.Debugf("Error posting test tweet. (%s)", err.Error())
+			return err
+		}
+		return nil
+	}
 	defer b.store.Close()
 
 	pendingTweets := make([]string, 0)
@@ -72,7 +79,13 @@ func (b *Bot) Run() error {
 		return nil
 	}
 
-	log.Infof("Sending %s tweets to Twitter API", len(pendingTweets))
+	if len(pendingTweets) > 0 {
+		log.Infof("Sending %d tweets to Twitter API", len(pendingTweets))
+	} else {
+		log.Info("No tweets to send. Exiting.")
+		return nil
+	}
+
 	for _, tweet := range pendingTweets {
 		log.Infof("Posting tweet (%s)", tweet)
 		if err := b.twitterClient.PostTweet(tweet); err != nil {
@@ -81,7 +94,6 @@ func (b *Bot) Run() error {
 		}
 	}
 	log.Info("Done sending tweets")
-
 	return nil
 }
 

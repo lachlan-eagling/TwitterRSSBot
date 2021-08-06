@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+RSSBot
 
 # Test binary, built with `go test -c`
 *.test
@@ -18,3 +19,4 @@
 */config-prod.yml
 */seen.txt
 .DS_Store
+*.log

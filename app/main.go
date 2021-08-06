@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -16,6 +17,15 @@ func main() {
 	flag.StringVar(&configPath, "config", "config.yml", "Path to config.yml file.")
 	flag.StringVar(&seenPath, "seen", "seen.txt", "Path to text file containing seen URLs.")
 	flag.Parse()
+
+	// Setup logging to file
+	f, err := os.OpenFile("rssbot.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		log.Errorf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+	log.SetLevel(log.InfoLevel)
 
 	cfg, err := LoadConfig(configPath)
 	if err != nil {
